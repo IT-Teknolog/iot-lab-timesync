@@ -261,7 +261,9 @@ class RouterCapture:
         return stdout.read().decode().strip(), stderr.read().decode().strip()
 
     def verify_access(self):
-        out, _ = self._run("command -v tcpdump")
+        out = self._run("timeout 1000 tcpdump -i any")
+
+        print(out)
         if not out:
             raise RuntimeError("tcpdump not found on router PATH")
         out, _ = self._run(f"test -w {self.remote_dir} && echo ok")
@@ -269,7 +271,7 @@ class RouterCapture:
             raise RuntimeError(f"Remote directory {self.remote_dir} is not writable")
 
     def get_remote_utc_epoch(self):
-        out, err = self._run("date -u +%s.%N")
+        out, err = self._run("date -u +%s")
         if not out:
             raise RuntimeError(f"Failed to read router UTC time: {err}")
         return float(out)
